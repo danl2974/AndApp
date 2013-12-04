@@ -47,8 +47,7 @@ public class HttpExampleActivity2 extends Activity {
     public void myClickHandler(View view) {
         // Gets the URL from the UI's text field.
         String stringUrl = urlText.getText().toString();
-        ConnectivityManager connMgr = (ConnectivityManager) 
-            getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
             new DownloadWebpageTask().execute(stringUrl);
@@ -81,6 +80,7 @@ public class HttpExampleActivity2 extends Activity {
         	//imgView.setImageBitmap(result);
         	File png = getFileStreamPath(result);
         	Uri uriToImage = Uri.fromFile(png);
+        	Log.i(DEBUG_TAG, "Uri Image: " + String.valueOf(uriToImage) );
         	imgView.setImageURI(uriToImage);
         	
         	
