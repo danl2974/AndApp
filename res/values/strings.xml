@@ -14,6 +14,7 @@
     <string name="chooser_title">Select Which Browser You Want To Use</string>
     <string name="button_share">Share</string> 
     <string name="action_refresh">Refresh</string>
-    <string name="button_httpConnTest">HttpConn</string>    
+    <string name="button_httpConnTest">HttpConn</string>
+    <string name="button_whatsaround">What\'s Around?</string> 
 
 </resources>

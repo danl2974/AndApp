@@ -87,6 +87,14 @@ public class MainActivity extends Activity {
 	}	
 	
 	
+	
+	public void whatsAround(View view) {
+		Intent intent = new Intent(this, WhatsAround.class);
+		startActivity(intent);
+		
+	}
+	
+	
 	public void doRefresh() {
 	    
 		EditText editText = (EditText) findViewById(R.id.edit_message);

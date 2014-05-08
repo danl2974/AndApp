@@ -20,10 +20,9 @@
     
      <ImageView android:id="@+id/myImg" 
         android:layout_below="@id/myUrl" 
-
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
- /> 
+        android:scaleType="fitCenter"
+        android:layout_width="300dp"
+        android:layout_height="300dp" />
 
      
 </RelativeLayout>

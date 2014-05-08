@@ -2,6 +2,7 @@ package com.dl2974.andapp;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import android.os.Bundle;
 import android.app.Activity;
@@ -114,8 +115,10 @@ public class DisplayMessageActivity extends Activity {
 
         String[] parts = datestamp.split("T");
         
-        SimpleDateFormat sdfm = new SimpleDateFormat ("hh:mm");
-        SimpleDateFormat sdfs = new SimpleDateFormat ("sss");
+        SimpleDateFormat sdfm = new SimpleDateFormat ("MMMM d @ h:mm:ss a");
+        sdfm.setTimeZone(TimeZone.getTimeZone("EST"));
+        SimpleDateFormat sdfs = new SimpleDateFormat ("EE");
+        sdfs.setTimeZone(TimeZone.getTimeZone("EST"));
         String minsec = sdfm.format(timeNow);
         String msec = sdfs.format(timeNow);
         
@@ -147,6 +150,8 @@ public class DisplayMessageActivity extends Activity {
 
      String selection = "";
      String[] selectionArgs = {};
+     //String selection = "title LIKE ?";
+     //String[] selectionArgs = {"Dec%"};
      // How you want the results sorted in the resulting Cursor
      String sortOrder =
          FeedEntry.COLUMN_NAME_TITLE + " DESC";

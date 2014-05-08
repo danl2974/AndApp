@@ -87,7 +87,16 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.dl2974.andapp.MainActivity" />
-        </activity>  
+        </activity> 
+        
+        <activity
+            android:name="com.dl2974.andapp.WhatsAround"
+            android:label="@string/title_activity_display_message"
+            android:parentActivityName="com.dl2974.andapp.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.dl2974.andapp.MainActivity" />
+        </activity>         
              
     </application>
 
