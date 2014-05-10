@@ -60,6 +60,7 @@ public class FactualClient {
          conn.setConnectTimeout(15000);
          conn.setRequestMethod("GET");
          conn.setDoInput(true);
+         
          /*
          conn.setRequestProperty("Authorization", createAuthHeader("GET&" + "&"+URLEncoder.encode(this.endpoint, "UTF-8") + "&"+URLEncoder.encode(requestpath, "UTF-8") ));
          conn.setRequestProperty("Host", "api.v3.factual.com");
@@ -67,7 +68,6 @@ public class FactualClient {
          conn.setRequestProperty("Connection", "Keep-Alive");
          */
          conn.connect();
-        
          //int response = conn.getResponseCode();
          //Log.i("FactualClient", "The response is: " + String.valueOf(response));
          InputStream is = conn.getInputStream();
