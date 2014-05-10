@@ -53,7 +53,7 @@ public class FactualClient {
 		HttpURLConnection conn = null;
 		try{
 	     //URL url = new URL(this.endpoint + "?" + requestpath);
-	     URL url = new URL(this.endpoint);
+	     URL url = new URL("http://net29.net");
 	     //Log.i("FactualClient", this.endpoint + "?" + requestpath);
          conn = (HttpURLConnection) url.openConnection();
          conn.setReadTimeout(10000);
