@@ -8,6 +8,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
@@ -90,7 +92,13 @@ public class WhatsAround extends Activity {
         @Override
         protected void onPostExecute(String result) {
                
-             textView.setText(result);
+        	ArrayList<HashMap<String,String>> dlist = FactualQueryParser.parseJsonResponse(result);
+        	StringBuilder sb = new StringBuilder();
+        	for (HashMap<String,String> di: dlist){
+        		sb.append(di.get("name") + " " + di.get("address"));
+        		sb.append("\n");
+        	}
+            textView.setText(sb.toString());
         	//imgView.setImageBitmap(result);
         	//File png = getFileStreamPath(result);
         	//Uri uriToImage = Uri.fromFile(png);
