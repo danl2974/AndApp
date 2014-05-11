@@ -126,7 +126,8 @@ public class WhatsAround extends Activity {
 			HttpURLConnection conn = null;
 			InputStream is = null;
 			try{
-			 String urlString = this.endpoint + "?" + URLEncoder.encode(requestParams, "UTF-8");
+			 String urlString = this.endpoint + "?" + requestParams;
+			 //String urlString = "http://c.sweepstakes-web.com" + "?" + requestParams;
 		     URL url = new URL(urlString);
 		     Log.i("FactualClient", urlString);
 	         conn = (HttpURLConnection) url.openConnection();
@@ -138,8 +139,8 @@ public class WhatsAround extends Activity {
 	         
 	         conn.setRequestProperty("Authorization",  createAuthHeader("GET&" + "&"+URLEncoder.encode(this.endpoint, "UTF-8") + "&"+URLEncoder.encode(requestpath, "UTF-8") ) );
 	         //conn.setRequestProperty("Host", "api.v3.factual.com");
-	         conn.setRequestProperty("X-Target-URI", "http://api.v3.factual.com");
-	         conn.setRequestProperty("Connection", "Keep-Alive");
+	         //conn.setRequestProperty("X-Target-URI", "http://api.v3.factual.com");
+	         //conn.setRequestProperty("Connection", "Keep-Alive");
 	         
 		     conn.connect();
 	         int response = conn.getResponseCode();
@@ -191,8 +192,9 @@ public class WhatsAround extends Activity {
 			auth.append( String.format("oauth_timestamp=\"%s\",", this.timestamp) );
 			auth.append( String.format("oauth_nonce=\"%s\",", this.nonce) );
 			auth.append("oauth_signature_method=\"HMAC-SHA1\",");
-			auth.append( String.format("oauth_signature=\"%s\"", computeSignature(baseString)) );
+			auth.append( String.format("oauth_signature=\"%s", computeSignature(baseString)) );
 			
+			Log.i("FactualClient", auth.toString());
 			return auth.toString();
 		}
 		
