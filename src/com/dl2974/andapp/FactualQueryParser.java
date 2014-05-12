@@ -38,8 +38,12 @@ public class FactualQueryParser {
 		  while (i.hasNext()) {
 			  HashMap<String,String> hm = new HashMap<String,String>();
 			  JSONObject dataitem = (JSONObject) i.next();
-			  hm.put("name", (String) dataitem.get("name"));
-			  hm.put("address", (String) dataitem.get("address"));
+			  for(int j = 0; j < FactualLocation.StringFields.length; j++){
+				if (dataitem.get(FactualLocation.StringFields[j]) != null){ 
+				  Log.i("Parser",  FactualLocation.StringFields[j] + (String) dataitem.get(FactualLocation.StringFields[j]) );
+			      hm.put(FactualLocation.StringFields[j], (String) dataitem.get(FactualLocation.StringFields[j]));
+				}else{Log.i("NullParser",  FactualLocation.StringFields[j]);}
+			  }
 			  hmlist.add(hm);
 		  }
         

@@ -10,6 +10,7 @@ import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
@@ -17,6 +18,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -25,19 +27,19 @@ import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 
-public class WhatsAround extends Activity {
+public class WhatsAround extends ListActivity {
 
 
     private static final String DEBUG_TAG = "WhatsAround";
     private EditText urlText;
     private TextView textView;
     private ImageView imgView;
-
 
     private String key;
     private String secret;
@@ -47,13 +49,27 @@ public class WhatsAround extends Activity {
     private static final int RESTAURANT_CAT = 347;
     private static final SecureRandom RANDOM = new SecureRandom();
 
+    private ArrayList<String> locations;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.http_test);   
-        urlText = (EditText) findViewById(R.id.myUrl);
-        textView = (TextView) findViewById(R.id.myText);
+        //setContentView(R.layout.http_test);   
+        //urlText = (EditText) findViewById(R.id.myUrl);
+        //textView = (TextView) findViewById(R.id.myText);
+        setContentView(R.layout.listview);
+        
+        
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+
+        this.key = "iaDJkLcnsCp7uvSe025F7vYR39eTzAk7uMFalBaq";
+	    this.secret = "gkvlBEWzFWYJBnE1I9ZfAkcQWkAaAmCGWVGU7ojo";
+	    this.nonce = computeNonce();
+	    this.timestamp = computeTimestamp();
+        new FactualClientTask().execute("347"); 
+        }
 
     }
 
@@ -78,6 +94,7 @@ public class WhatsAround extends Activity {
 
 
      public class FactualClientTask extends AsyncTask<String, Void, String> {
+    	 
         @Override
         protected String doInBackground(String... urls) {
               
@@ -93,12 +110,25 @@ public class WhatsAround extends Activity {
         protected void onPostExecute(String result) {
                
         	ArrayList<HashMap<String,String>> dlist = FactualQueryParser.parseJsonResponse(result);
-        	StringBuilder sb = new StringBuilder();
-        	for (HashMap<String,String> di: dlist){
-        		sb.append(di.get("name") + " " + di.get("address"));
-        		sb.append("\n");
+        	ArrayList<String> locationsList = new ArrayList<String>();
+        	Log.i("WhatsAround", "QueryParser call - size: " + String.valueOf(dlist.size()) );
+        	for (HashMap<String,String> dhm: dlist){ 
+        		StringBuilder sb = new StringBuilder();
+        		for (Map.Entry<String,String> entry: dhm.entrySet()){  
+        			Log.i("WhatsAround", entry.getKey() + entry.getValue());
+        		    sb.append(entry.getKey() + ": " + entry.getValue());
+        		    sb.append("\n");
+        		}
+        		locationsList.add(sb.toString());
         	}
-            textView.setText(sb.toString());
+        	Log.i("WhatsAround", "After Locations List Create - size: " + String.valueOf(locationsList.size()) );
+            setListAdapter(new ArrayAdapter<String>(WhatsAround.this,
+                    android.R.layout.simple_list_item_1,
+                    android.R.id.text1,
+                    locationsList));
+        	
+            //textView.setText(sb.toString());
+            
         	//imgView.setImageBitmap(result);
         	//File png = getFileStreamPath(result);
         	//Uri uriToImage = Uri.fromFile(png);

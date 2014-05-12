@@ -2,26 +2,34 @@ package com.dl2974.andapp;
 
 public class FactualLocation {
 
-  public static String[] Fields = {
+  public static String[] StringFields = {
 "name",
 "address",
 "locality",
 "region",
 "postcode",
 "country",
-"neighborhood",
 "tel",
 "website",
-"latitude",
-"longitude",
 "status",
 "chain_name",
 "email",
-"category_labels",
 "post_town",
-"category_ids",
 "chain_id",
-"hours",
-"po_box"
+"hours_display",
+"po_box",
+"factual_id"
   };
+
+  public static String[] ArrayFields = {
+	  "neighborhood",
+	  "category_labels",
+	  "category_ids"
+  };
+  
+  public static String[] DoubleFields = {
+	  "latitude",
+	  "longitude"
+  };
+  
 }
