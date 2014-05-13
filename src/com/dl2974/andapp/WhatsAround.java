@@ -110,23 +110,24 @@ public class WhatsAround extends ListActivity {
         protected void onPostExecute(String result) {
                
         	ArrayList<HashMap<String,String>> dlist = FactualQueryParser.parseJsonResponse(result);
+        	/*
         	ArrayList<String> locationsList = new ArrayList<String>();
-        	Log.i("WhatsAround", "QueryParser call - size: " + String.valueOf(dlist.size()) );
         	for (HashMap<String,String> dhm: dlist){ 
         		StringBuilder sb = new StringBuilder();
         		for (Map.Entry<String,String> entry: dhm.entrySet()){  
-        			Log.i("WhatsAround", entry.getKey() + entry.getValue());
+        			
         		    sb.append(entry.getKey() + ": " + entry.getValue());
         		    sb.append("\n");
         		}
         		locationsList.add(sb.toString());
         	}
-        	Log.i("WhatsAround", "After Locations List Create - size: " + String.valueOf(locationsList.size()) );
+        	
             setListAdapter(new ArrayAdapter<String>(WhatsAround.this,
                     android.R.layout.simple_list_item_1,
                     android.R.id.text1,
                     locationsList));
-        	
+            */
+            setListAdapter(new FactualArrayAdapter(WhatsAround.this, dlist));       	
             //textView.setText(sb.toString());
             
         	//imgView.setImageBitmap(result);
