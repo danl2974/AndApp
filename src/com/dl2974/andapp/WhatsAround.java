@@ -11,6 +11,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
@@ -86,6 +87,9 @@ GooglePlayServicesClient.OnConnectionFailedListener  {
     SharedPreferences.Editor mEditor;
     boolean mUpdatesRequested = false;
     
+	private double latitude;
+	private double longitude;
+    
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -106,10 +110,11 @@ GooglePlayServicesClient.OnConnectionFailedListener  {
 	    this.timestamp = computeTimestamp();
 	    
 	    this.mLocationRequest = LocationRequest.create();
+	    this.mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 	    this.mLocationClient = new LocationClient(this, this, this);
 	    this.mLocationClient.connect();
 	    
-        new FactualClientTask().execute("347"); 
+        //new FactualClientTask().execute("347");
         }
 
     }
@@ -193,17 +198,22 @@ GooglePlayServicesClient.OnConnectionFailedListener  {
      
 
   private String callFactual(String categoryId) throws IOException {
+	  /*
 	  Location currentLocation = null;
+	  try{
 	  if (servicesConnected()) {
+		  Log.i("WHATSAROUND", "inside if block");
           currentLocation = mLocationClient.getLastLocation();
 	  }
-	  Log.i("WHATSAROUND", "before lang lat assign");
+	 Log.i("WHATSAROUND", "before lang lat assign");
 	 double latitude = currentLocation.getLatitude();
 	 double longitude = currentLocation.getLongitude();
 	 Log.i("WHATSAROUND", String.valueOf(latitude));
+	  }catch(Exception e){Log.d("WHATSAROUND", "exception " + e.getMessage());}
      //double latitude = 26.303359;
      //double longitude = -80.122905;
-     int meters = 10000;
+      */
+     int meters = 20000;
      String requestParams = String.format("filters={\"$and\":[{\"category_ids\":%d}]}&geo={\"$circle\":{\"$center\":[%f,%f],\"$meters\":%d}}", Integer.valueOf(categoryId), latitude, longitude, meters);
      String normalizedParams = requestParams + String.format("&oauth_consumer_key=%s&oauth_nonce=%s&oauth_signature_method=HMAC-SHA1&oauth_timestamp=%s&oauth_version=1.0", this.key, this.nonce, this.timestamp);
      String json = doConnection(normalizedParams, requestParams);
@@ -322,10 +332,23 @@ GooglePlayServicesClient.OnConnectionFailedListener  {
 		@Override
 		public void onConnected(Bundle bundle) {
 		        //mConnectionStatus.setText(R.string.connected);
-
+			    //startPeriodicUpdates();
+			    Log.i("whatsaround", "inside onConnected");
+			    mLocationClient.requestLocationUpdates(mLocationRequest, this);
+			    /*
+			    try{
+			    Location currentLocation = this.mLocationClient.getLastLocation();
+				this.latitude = currentLocation.getLatitude();
+				this.longitude = currentLocation.getLongitude();
+			    new FactualClientTask().execute("347");
+			    }catch(Exception e){Log.i("whatsaround", " " + e.getMessage() );}
+                */
+			    
+			    /*
 		        if (mUpdatesRequested) {
 		            startPeriodicUpdates();
 		        }
+		        */
 		    }
 
 		    /*
@@ -378,12 +401,24 @@ GooglePlayServicesClient.OnConnectionFailedListener  {
 
 		    @Override
 		    public void onLocationChanged(Location location) {
-
+		    	
+		    	Log.i("WHATSAROUND", "inside onLocationChanged");
+		    	longitude = location.getLongitude();
+		        latitude = location.getLatitude();
+		        //String factualLocationCategory = "347"; // Restaurants
+		        Log.i("WHATSAROUND long lat", String.format("%f %f", longitude, latitude));
+		   	    int min = 2;
+			    int max = 440;
+			    Random rand = new Random();
+			    String factualLocationCategory = String.valueOf(rand.nextInt(max - min) + min);
+			    Log.i("WHATSAROUND Factual Category", factualLocationCategory);
+		        new FactualClientTask().execute(factualLocationCategory);
+		        
 		        // Report to the UI that the location was updated
 		        //mConnectionStatus.setText(R.string.location_updated);
 
 		        // In the UI, set the latitude and longitude to the value received
-		        mLatLng.setText(LocationUtils.getLatLng(this, location));
+		        //mLatLng.setText(LocationUtils.getLatLng(this, location));
 		    }
 
 
@@ -408,8 +443,8 @@ GooglePlayServicesClient.OnConnectionFailedListener  {
 		    public void onPause() {
 
 		        // Save the current setting for updates
-		        mEditor.putBoolean(LocationUtils.KEY_UPDATES_REQUESTED, mUpdatesRequested);
-		        mEditor.commit();
+		        //mEditor.putBoolean(LocationUtils.KEY_UPDATES_REQUESTED, mUpdatesRequested);
+		        //mEditor.commit();
 
 		        super.onPause();
 		    }
@@ -417,7 +452,7 @@ GooglePlayServicesClient.OnConnectionFailedListener  {
 		    @Override
 		    public void onResume() {
 		        super.onResume();
-
+                /*
 		        // If the app already has a setting for getting location updates, get it
 		        if (mPrefs.contains(LocationUtils.KEY_UPDATES_REQUESTED)) {
 		            mUpdatesRequested = mPrefs.getBoolean(LocationUtils.KEY_UPDATES_REQUESTED, false);
@@ -427,17 +462,19 @@ GooglePlayServicesClient.OnConnectionFailedListener  {
 		            mEditor.putBoolean(LocationUtils.KEY_UPDATES_REQUESTED, false);
 		            mEditor.commit();
 		        }
+		        */
 
 		    }
 
 		    private void startPeriodicUpdates() {
-
+          
 		        mLocationClient.requestLocationUpdates(mLocationRequest, this);
+		        Log.i("WHATSAROUND", "startPeriodicUpdates()");
 		        //mConnectionState.setText(R.string.location_requested);
 		    }
 		    
 		    private void stopPeriodicUpdates() {
-		        mLocationClient.removeLocationUpdates(this);
+		        //mLocationClient.removeLocationUpdates(this);
 		        //mConnectionState.setText(R.string.location_updates_stopped);
 		    }
 		    
