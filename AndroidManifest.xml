@@ -92,7 +92,7 @@
         
         <activity
             android:name="com.dl2974.andapp.WhatsAround"
-            android:label="@string/title_activity_display_message"
+            android:theme="@android:style/Theme.NoTitleBar"
             android:parentActivityName="com.dl2974.andapp.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

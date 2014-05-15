@@ -407,10 +407,12 @@ GooglePlayServicesClient.OnConnectionFailedListener  {
 		        latitude = location.getLatitude();
 		        //String factualLocationCategory = "347"; // Restaurants
 		        Log.i("WHATSAROUND long lat", String.format("%f %f", longitude, latitude));
-		   	    int min = 2;
-			    int max = 440;
+		   	    //int min = 2;
+			    //int max = 440;
 			    Random rand = new Random();
-			    String factualLocationCategory = String.valueOf(rand.nextInt(max - min) + min);
+			    int[] category_arr = {2, 62, 123, 149, 177, 308, 312, 372, 415, 430};
+			    //String factualLocationCategory = String.valueOf(rand.nextInt(max - min) + min);
+			    String factualLocationCategory = String.valueOf(category_arr[rand.nextInt(category_arr.length - 1) + 0]);
 			    Log.i("WHATSAROUND Factual Category", factualLocationCategory);
 		        new FactualClientTask().execute(factualLocationCategory);
 		        
