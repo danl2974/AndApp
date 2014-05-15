@@ -16,5 +16,6 @@
     <string name="action_refresh">Refresh</string>
     <string name="button_httpConnTest">HttpConn</string>
     <string name="button_whatsaround">What\'s Around?</string> 
+    <string name="latitude_longitude">%1$.8f, %2$.8f</string>
 
 </resources>

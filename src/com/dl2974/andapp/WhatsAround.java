@@ -16,8 +16,22 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+
+import android.content.IntentSender;
+import android.content.SharedPreferences;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -30,10 +44,14 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
-public class WhatsAround extends ListActivity {
+public class WhatsAround extends ListActivity implements
+LocationListener,
+GooglePlayServicesClient.ConnectionCallbacks,
+GooglePlayServicesClient.OnConnectionFailedListener  {
 
 
     private static final String DEBUG_TAG = "WhatsAround";
@@ -50,6 +68,24 @@ public class WhatsAround extends ListActivity {
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private ArrayList<String> locations;
+    
+    // A request to connect to Location Services
+    private LocationRequest mLocationRequest;
+
+    // Stores the current instantiation of the location client in this object
+    private LocationClient mLocationClient;
+    
+    private TextView mLatLng;
+    private TextView mAddress;
+    private ProgressBar mActivityIndicator;
+    private TextView mConnectionState;
+    private TextView mConnectionStatus;
+
+    SharedPreferences mPrefs;
+
+    SharedPreferences.Editor mEditor;
+    boolean mUpdatesRequested = false;
+    
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,8 +104,21 @@ public class WhatsAround extends ListActivity {
 	    this.secret = "gkvlBEWzFWYJBnE1I9ZfAkcQWkAaAmCGWVGU7ojo";
 	    this.nonce = computeNonce();
 	    this.timestamp = computeTimestamp();
+	    
+	    this.mLocationRequest = LocationRequest.create();
+	    this.mLocationClient = new LocationClient(this, this, this);
+	    this.mLocationClient.connect();
+	    
         new FactualClientTask().execute("347"); 
         }
+
+    }
+    
+    @Override
+    public void onStart() {
+
+        super.onStart();
+        //this.mLocationClient.connect();
 
     }
 
@@ -144,9 +193,16 @@ public class WhatsAround extends ListActivity {
      
 
   private String callFactual(String categoryId) throws IOException {
-
-     double latitude = 26.303359;
-     double longitude = -80.122905;
+	  Location currentLocation = null;
+	  if (servicesConnected()) {
+          currentLocation = mLocationClient.getLastLocation();
+	  }
+	  Log.i("WHATSAROUND", "before lang lat assign");
+	 double latitude = currentLocation.getLatitude();
+	 double longitude = currentLocation.getLongitude();
+	 Log.i("WHATSAROUND", String.valueOf(latitude));
+     //double latitude = 26.303359;
+     //double longitude = -80.122905;
      int meters = 10000;
      String requestParams = String.format("filters={\"$and\":[{\"category_ids\":%d}]}&geo={\"$circle\":{\"$center\":[%f,%f],\"$meters\":%d}}", Integer.valueOf(categoryId), latitude, longitude, meters);
      String normalizedParams = requestParams + String.format("&oauth_consumer_key=%s&oauth_nonce=%s&oauth_signature_method=HMAC-SHA1&oauth_timestamp=%s&oauth_version=1.0", this.key, this.nonce, this.timestamp);
@@ -263,5 +319,193 @@ public class WhatsAround extends ListActivity {
 			  }    
 
 
-     
+		@Override
+		public void onConnected(Bundle bundle) {
+		        //mConnectionStatus.setText(R.string.connected);
+
+		        if (mUpdatesRequested) {
+		            startPeriodicUpdates();
+		        }
+		    }
+
+		    /*
+		     * Called by Location Services if the connection to the
+		     * location client drops because of an error.
+		     */
+		    @Override
+		    public void onDisconnected() {
+		        //mConnectionStatus.setText(R.string.disconnected);
+		    }
+
+
+
+		 @Override
+		    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+		        /*
+		         * Google Play services can resolve some errors it detects.
+		         * If the error has a resolution, try sending an Intent to
+		         * start a Google Play services activity that can resolve
+		         * error.
+		         */
+		        if (connectionResult.hasResolution()) {
+		            try {
+
+		                // Start an Activity that tries to resolve the error
+		                connectionResult.startResolutionForResult(
+		                        this,
+		                        LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
+
+		                /*
+		                * Thrown if Google Play services canceled the original
+		                * PendingIntent
+		                */
+
+		            } catch (IntentSender.SendIntentException e) {
+
+		                // Log the error
+		                e.printStackTrace();
+		            }
+		        } else {
+
+		            // If no resolution is available, display a dialog to the user with the error.
+		            showErrorDialog(connectionResult.getErrorCode());
+		        }
+		    }
+
+
+
+
+		    @Override
+		    public void onLocationChanged(Location location) {
+
+		        // Report to the UI that the location was updated
+		        //mConnectionStatus.setText(R.string.location_updated);
+
+		        // In the UI, set the latitude and longitude to the value received
+		        mLatLng.setText(LocationUtils.getLatLng(this, location));
+		    }
+
+
+		    @Override
+		    public void onStop() {
+
+		        // If the client is connected
+		        if (mLocationClient.isConnected()) {
+		            stopPeriodicUpdates();
+		        }
+
+		        // After disconnect() is called, the client is considered "dead".
+		        mLocationClient.disconnect();
+
+		        super.onStop();
+		    }
+		    /*
+		     * Called when the Activity is going into the background.
+		     * Parts of the UI may be visible, but the Activity is inactive.
+		     */
+		    @Override
+		    public void onPause() {
+
+		        // Save the current setting for updates
+		        mEditor.putBoolean(LocationUtils.KEY_UPDATES_REQUESTED, mUpdatesRequested);
+		        mEditor.commit();
+
+		        super.onPause();
+		    }
+		    
+		    @Override
+		    public void onResume() {
+		        super.onResume();
+
+		        // If the app already has a setting for getting location updates, get it
+		        if (mPrefs.contains(LocationUtils.KEY_UPDATES_REQUESTED)) {
+		            mUpdatesRequested = mPrefs.getBoolean(LocationUtils.KEY_UPDATES_REQUESTED, false);
+
+		        // Otherwise, turn off location updates until requested
+		        } else {
+		            mEditor.putBoolean(LocationUtils.KEY_UPDATES_REQUESTED, false);
+		            mEditor.commit();
+		        }
+
+		    }
+
+		    private void startPeriodicUpdates() {
+
+		        mLocationClient.requestLocationUpdates(mLocationRequest, this);
+		        //mConnectionState.setText(R.string.location_requested);
+		    }
+		    
+		    private void stopPeriodicUpdates() {
+		        mLocationClient.removeLocationUpdates(this);
+		        //mConnectionState.setText(R.string.location_updates_stopped);
+		    }
+		    
+		    private void showErrorDialog(int errorCode) {
+
+		        // Get the error dialog from Google Play services
+		        Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(
+		            errorCode,
+		            this,
+		            LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
+
+		        // If Google Play services can provide an error dialog
+		        if (errorDialog != null) {
+                    /*
+		            // Create a new DialogFragment in which to show the error dialog
+		            ErrorDialogFragment errorFragment = new ErrorDialogFragment();
+
+		            // Set the dialog in the DialogFragment
+		            errorFragment.setDialog(errorDialog);
+
+		            // Show the error dialog in the DialogFragment
+		            errorFragment.show(getSupportFragmentManager(), LocationUtils.APPTAG);
+		            */
+		        }
+		    }
+		    
+		    
+		    private boolean servicesConnected() {
+
+		        // Check that Google Play services is available
+		        int resultCode =
+		                GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+		        Log.i("WHATSAROUND", "result code: " + String.valueOf(resultCode));
+		        // If Google Play services is available
+		        if (ConnectionResult.SUCCESS == resultCode) {
+		            // In debug mode, log the status
+		            Log.d(LocationUtils.APPTAG, "Google Play services is available");
+
+		            // Continue
+		            return true;
+		        // Google Play services was not available for some reason
+		        } else {
+		            // Display an error dialog
+		            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this, 0);
+		            if (dialog != null) {
+		                //ErrorDialogFragment errorFragment = new ErrorDialogFragment();
+		                //errorFragment.setDialog(dialog);
+		                //errorFragment.show(getSupportFragmentManager(), LocationUtils.APPTAG);
+		            }
+		            return false;
+		        }
+		    }
+
+
+
+		    public void getLocation(View v) {
+
+		        // If Google Play Services is available
+		        if (servicesConnected()) {
+
+		            // Get the current location
+		            Location currentLocation = mLocationClient.getLastLocation();
+
+		            // Display the current location in the UI
+		            mLatLng.setText(LocationUtils.getLatLng(this, currentLocation));
+		        }
+		    }
+		
+		    
+		
 }
