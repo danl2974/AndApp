@@ -34,6 +34,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -89,6 +90,8 @@ GooglePlayServicesClient.OnConnectionFailedListener  {
     
 	private double latitude;
 	private double longitude;
+	
+	private ProgressDialog dialog;
     
     
     @Override
@@ -98,6 +101,8 @@ GooglePlayServicesClient.OnConnectionFailedListener  {
         //urlText = (EditText) findViewById(R.id.myUrl);
         //textView = (TextView) findViewById(R.id.myText);
         setContentView(R.layout.listview);
+        this.dialog = new ProgressDialog(this);
+        this.dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER); 
         
         
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -159,10 +164,19 @@ GooglePlayServicesClient.OnConnectionFailedListener  {
                 return null;
             }
         }
+        
+        @Override
+        protected void onPreExecute() {
+        	WhatsAround.this.dialog.setMessage("Getting Location Information");
+        	WhatsAround.this.dialog.show();
+        }
+        
         // onPostExecute displays the results of the AsyncTask.
         @Override
         protected void onPostExecute(String result) {
-               
+            if (WhatsAround.this.dialog.isShowing()) {
+            	WhatsAround.this.dialog.dismiss();
+            }   
         	ArrayList<HashMap<String,String>> dlist = FactualQueryParser.parseJsonResponse(result);
         	/*
         	ArrayList<String> locationsList = new ArrayList<String>();
