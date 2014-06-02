@@ -46,8 +46,10 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class WhatsAround extends ListActivity implements
@@ -101,6 +103,7 @@ GooglePlayServicesClient.OnConnectionFailedListener  {
         //urlText = (EditText) findViewById(R.id.myUrl);
         //textView = (TextView) findViewById(R.id.myText);
         setContentView(R.layout.listview);
+        
         this.dialog = new ProgressDialog(this);
         this.dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER); 
         
@@ -559,6 +562,10 @@ GooglePlayServicesClient.OnConnectionFailedListener  {
 		        }
 		    }
 		
-		    
+		    @Override
+		    protected void onListItemClick(ListView l, View v, int position, long id) {
+		      HashMap<String,String> item = (HashMap<String,String>) getListAdapter().getItem(position);
+		      Toast.makeText(this, item.get("name"), Toast.LENGTH_LONG).show();
+		    } 
 		
 }
